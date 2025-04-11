@@ -678,10 +678,10 @@
   
   <style scoped>
   .weather-container {
-    width: 1200px;
+    width: 100%;
     height: 925px;
     margin: 0 auto;
-    color: #2c3e50;
+    color: #eeeeee;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -690,13 +690,16 @@
   }
   
   .weather-card {
-    width: 100%;
+    width: 95%;
     height: 100%;
     padding: 40px;
-    background: #e8e8e8;
+    background: #eeeeee;
     backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
   }
   
   /* 顶部搜索栏 */
@@ -768,7 +771,7 @@
   
   .weather-icon {
     width: 180px;
-    height: 180px;
+    height: 120px;
     margin: 0 auto;
   }
   

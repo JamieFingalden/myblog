@@ -1,4 +1,11 @@
 <script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const navigateToChat = () => {
+  router.push('/chat');
+};
 </script>
 
 <template>
@@ -12,7 +19,7 @@
       <div class="logo nav-item">RESUME</div>
     </div>
     
-    <div class="talk"><span>Let's Talk 💬</span></div>
+    <div class="talk" @click="navigateToChat"><span>Let's Talk 💬</span></div>
   </div>
 </template>
 

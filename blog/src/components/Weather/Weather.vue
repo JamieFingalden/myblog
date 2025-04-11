@@ -11,7 +11,7 @@ import WeatherForecast from './WeatherForecast.vue';
 <style scoped>
 .weatherMain {
   margin-top: 50px;
-  padding: 50px;
+  padding: 0px 50px;
   width: 1200px;
 }
 </style>

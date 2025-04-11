@@ -16,6 +16,12 @@ const router = createRouter({
       name: 'weather',
       component: () => import('../components/Weather/Weather.vue')
     },
+    // 添加AI聊天页面的路由
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('../View/AIChat/Chat.vue')
+    }
   ]
 })
 
