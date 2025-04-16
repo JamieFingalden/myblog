@@ -145,7 +145,7 @@ const seasonEmojis = {
 <style scoped>
 /* 主要布局 */
 .main {
-    margin-top: 50px;
+    margin-top: 15px;
     padding: 50px;
     width: 1000px;
     height: 450px;

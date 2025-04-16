@@ -15,7 +15,7 @@ const navigateToChat = () => {
     <div class="nav-links">
       <router-link to="/" active-class="active"><div class="logo nav-item">HOME</div></router-link>
       <router-link to="/weather" active-class="active"><div class="logo nav-item">WEATHER</div></router-link>
-      <div class="logo nav-item">PORTFOLIO</div>
+      <div class="logo nav-item">COLLECTION</div>
       <div class="logo nav-item">RESUME</div>
     </div>
     

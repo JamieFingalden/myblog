@@ -681,7 +681,6 @@
     width: 100%;
     height: 925px;
     margin: 0 auto;
-    color: #eeeeee;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -693,7 +692,7 @@
     width: 95%;
     height: 100%;
     padding: 40px;
-    background: #eeeeee;
+    background: #ffffff;
     backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
@@ -749,7 +748,7 @@
   .main-content {
     display: flex;
     flex: 1;
-    gap: 40px;
+    gap: 15px;
     height: calc(100% - 100px);
   }
   
@@ -822,6 +821,7 @@
     border-radius: 20px;
     padding: 25px;
     padding-top: 10px;
+    padding-bottom: 10px;
   }
   
   .hourly-forecast {
