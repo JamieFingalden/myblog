@@ -1,13 +1,13 @@
-package com.fingalden.bolg;
+package com.fingalden.blog;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BolgBackendApplication {
+public class BlogBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BolgBackendApplication.class, args);
+        SpringApplication.run(BlogBackendApplication.class, args);
     }
 
 }

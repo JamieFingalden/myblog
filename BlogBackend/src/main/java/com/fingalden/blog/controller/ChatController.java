@@ -1,4 +1,4 @@
-package com.fingalden.bolg.controller;
+package com.fingalden.blog.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;

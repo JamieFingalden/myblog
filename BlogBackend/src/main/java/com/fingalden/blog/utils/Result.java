@@ -1,4 +1,4 @@
-package com.fingalden.bolg.utils;
+package com.fingalden.blog.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

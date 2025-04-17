@@ -1,6 +1,6 @@
-package com.fingalden.bolg.mapper;
+package com.fingalden.blog.mapper;
 
-import com.fingalden.bolg.domain.Posts;
+import com.fingalden.blog.domain.Posts;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

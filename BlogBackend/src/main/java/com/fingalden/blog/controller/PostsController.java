@@ -1,8 +1,8 @@
-package com.fingalden.bolg.controller;
+package com.fingalden.blog.controller;
 
-import com.fingalden.bolg.domain.Posts;
-import com.fingalden.bolg.service.PostsService;
-import com.fingalden.bolg.utils.Result;
+import com.fingalden.blog.domain.Posts;
+import com.fingalden.blog.service.PostsService;
+import com.fingalden.blog.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

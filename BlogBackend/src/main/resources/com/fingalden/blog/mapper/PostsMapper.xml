@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.fingalden.bolg.mapper.PostsMapper">
+<mapper namespace="com.fingalden.blog.mapper.PostsMapper">
 
-    <resultMap id="BaseResultMap" type="com.fingalden.bolg.domain.Posts">
+    <resultMap id="BaseResultMap" type="com.fingalden.blog.domain.Posts">
             <id property="id" column="id" />
             <result property="title" column="title" />
             <result property="content" column="content" />
@@ -25,7 +25,7 @@
         from posts
         where  id = #{id} 
     </select>
-    <select id="selectList" resultType="com.fingalden.bolg.domain.Posts">
+    <select id="selectList" resultType="com.fingalden.blog.domain.Posts">
         select
         <include refid="Base_Column_List" />
         from posts
@@ -35,14 +35,14 @@
         delete from posts
         where  id = #{id} 
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.fingalden.bolg.domain.Posts" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.fingalden.blog.domain.Posts" useGeneratedKeys="true">
         insert into posts
         ( id,title,content,excerpt,status,created_at,
         published_at)
         values (#{id},#{title},#{content},#{excerpt},#{status},#{createdAt},
         #{publishedAt})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.fingalden.bolg.domain.Posts" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.fingalden.blog.domain.Posts" useGeneratedKeys="true">
         insert into posts
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -63,7 +63,7 @@
                 <if test="publishedAt != null">#{publishedAt},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.fingalden.bolg.domain.Posts">
+    <update id="updateByPrimaryKeySelective" parameterType="com.fingalden.blog.domain.Posts">
         update posts
         <set>
                 <if test="title != null">
@@ -87,7 +87,7 @@
         </set>
         where   id = #{id} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.fingalden.bolg.domain.Posts">
+    <update id="updateByPrimaryKey" parameterType="com.fingalden.blog.domain.Posts">
         update posts
         set 
             title =  #{title},

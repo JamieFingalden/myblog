@@ -1,4 +1,4 @@
-package com.fingalden.bolg.domain;
+package com.fingalden.blog.domain;
 
 import java.util.Date;
 import lombok.Data;

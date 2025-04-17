@@ -1,6 +1,6 @@
-package com.fingalden.bolg.service;
+package com.fingalden.blog.service;
 
-import com.fingalden.bolg.domain.Posts;
+import com.fingalden.blog.domain.Posts;
 import java.util.List;
 
 public interface PostsService {

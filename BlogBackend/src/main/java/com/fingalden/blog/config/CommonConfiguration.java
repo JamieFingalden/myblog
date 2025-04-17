@@ -1,4 +1,4 @@
-package com.fingalden.bolg.config;
+package com.fingalden.blog.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;

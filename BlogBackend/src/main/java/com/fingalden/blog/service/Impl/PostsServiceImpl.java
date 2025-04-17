@@ -1,8 +1,8 @@
-package com.fingalden.bolg.service.Impl;
+package com.fingalden.blog.service.Impl;
 
-import com.fingalden.bolg.domain.Posts;
-import com.fingalden.bolg.mapper.PostsMapper;
-import com.fingalden.bolg.service.PostsService;
+import com.fingalden.blog.domain.Posts;
+import com.fingalden.blog.mapper.PostsMapper;
+import com.fingalden.blog.service.PostsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
