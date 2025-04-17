@@ -1,73 +1,73 @@
-<script setup lang="ts">
-
-import Card from 'primevue/card';
-import { Avatar } from 'primevue';
-
-// Define props
-const props = defineProps<{
-  title: string;
-  name: string;
-  content: string;
-  img: string;
-}>();
-
+<script setup>
+defineProps({
+    title: {
+        type: String,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    img: {
+        type: String,
+        default: ''
+    }
+});
 </script>
 
 <template>
-<Card style="width: 25rem; overflow: hidden; background-color: white !important;" class="white-card">
-    <template #header>
-        <div style="padding-top: 30px;">
-            <Avatar :image="props.img || 'http://localhost:5173/src/assets/photo/%E7%AE%80%E5%8E%86%E7%85%A7.png'" size="large" shape="circle" ></Avatar>
-        </div>
-    </template>
-    <template #title>{{ props.title }}</template>
-    <template #subtitle>{{ props.name }}</template>
-    <template #content>
-        <p class="m-0">
-            {{ props.content }}
-        </p>
-    </template>
-</Card>
+    <div class="card">
+        <h3>{{ title }}</h3>
+        <p class="author">{{ name }}</p>
+        <p class="content">{{ content }}</p>
+        <!-- <img v-if="img" :src="img" alt="博客图片"> -->
+    </div>
 </template>
 
 <style scoped>
+.card {
+    padding: 20px;
+    margin: 0 auto;
+    height: 100%;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: none;
+    outline: none;
+    /* 添加弹性布局实现垂直水平居中 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+}
+
+.author {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.content {
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+    border: none;
+    /* 确保内容区域没有边框 */
+}
+
 img {
-    margin-top: 30px;
-}
-Avatar{
-    margin-top: 30px;
-}
-
-/* 强制使用白色背景 */
-:deep(.white-card) {
-    background-color: white !important;
-    color: #333 !important;
-}
-
-:deep(.white-card .p-card-body) {
-    background-color: white !important;
-}
-
-:deep(.white-card .p-card-content) {
-    background-color: white !important;
-    color: #333 !important;
-}
-
-:deep(.white-card .p-card-header) {
-    background-color: white !important;
-}
-
-:deep(.white-card .p-card-title) {
-    color: #333 !important;
-}
-
-:deep(.white-card .p-card-subtitle) {
-    color: #666 !important;
-}
-
-/* 覆盖任何可能的暗色主题样式 */
-:deep(.p-component), :deep(.p-card) {
-    background-color: white !important;
-    color: #333 !important;
+    margin-top: 15px;
+    max-width: 100%;
+    border-radius: 8px;
 }
 </style>

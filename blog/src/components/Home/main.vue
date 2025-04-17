@@ -10,6 +10,8 @@ import douyinClick from '../../assets/link/douyin-click.png'
 import githubImg from '../../assets/link/github.png'
 import githubClick from '../../assets/link/github-click.png'
 
+import { blogApi } from '../../api/blog'
+
 const bilibiliPng = ref(bilibiliBlack)
 const douyinPng = ref(douyinImg)
 const githubPng = ref(githubImg)
@@ -33,12 +35,36 @@ const leavegithub = () => {
 }
 
 // 博客数据
-const bolgDatas = [
-    { title: 'first', name: 'fingalden', content: 'OK OK？', img: '' },
-    { title: 'test1', name: 'fingalden', content: 'test1', img: '' },
-    { title: 'test2', name: 'fingalden', content: 'test2', img: '' },
-    { title: 'test3', name: 'fingalden', content: 'test3', img: '' },
-]
+// 博客数据改为响应式数据
+const blogDatas = ref([]);
+
+// 获取博客列表数据
+const fetchBlogList = async () => {
+    try {
+        const response = await blogApi.getList();
+        if (response.data.code === 200) {
+            console.log('获取到的博客数据:', response.data.data); // 添加日志
+            blogDatas.value = response.data.data.map(item => ({
+                title: item.title,
+                name: 'fingalden',
+                content: item.content,
+                img: '',
+                id: item.id,
+                excerpt: item.excerpt,
+                status: item.status
+            }));
+            console.log('处理后的数据:', blogDatas.value); // 添加日志
+        }
+    } catch (error) {
+        console.error('获取博客列表失败:', error);
+        blogDatas.value = [];
+    }
+};
+
+// 在组件挂载时获取数据
+onMounted(() => {
+    fetchBlogList();
+});
 
 // 博客详情状态
 const showBlog = ref(false)
@@ -67,17 +93,17 @@ const season = ref((() => {
 })());
 
 // 卡片动画控制
-const cardAnimationDelay = index => ({ 
-  'animation-delay': `${0.2 + index * 0.15}s`,
-  'animation-duration': '0.8s'
+const cardAnimationDelay = index => ({
+    'animation-delay': `${0.2 + index * 0.15}s`,
+    'animation-duration': '0.8s'
 });
 
 // 季节装饰映射
 const seasonEmojis = {
-  spring: '🌱 🌸',
-  summer: '🌞 🍉',
-  autumn: '🍁 🍂',
-  winter: '❄️ ⛄'
+    spring: '🌱 🌸',
+    summer: '🌞 🍉',
+    autumn: '🍁 🍂',
+    winter: '❄️ ⛄'
 };
 </script>
 
@@ -91,7 +117,8 @@ const seasonEmojis = {
                     Hello, I am Jamie・Fingalden, a Software Technology scholar.
                     I am passionate about programming and have been involved in the development of several projects,
                     including a sales and inventory management system using the RuoYi framework.
-                    I am committed to continuously improving my technical skills and leveraging my strengths in my future
+                    I am committed to continuously improving my technical skills and leveraging my strengths in my
+                    future
                     career.
                 </span>
             </div>
@@ -110,14 +137,14 @@ const seasonEmojis = {
             <img src="../../assets/photo/简历照.png" alt="">
         </div>
     </div>
-    
+
     <div class="cards">
-        <div class="card-container" 
-             :style="cardAnimationDelay(index)"
-             style="width: 350px; background-color: #ffffff;" 
-             v-for="(item, index) in bolgDatas" 
-             :key="index"
-             @click="handleCardClick(item)">
+        <!-- 添加数据长度显示 -->
+        <div v-if="blogDatas.length === 0" class="no-data">
+            暂无博客数据
+        </div>
+        <div class="card-container" v-for="(item, index) in blogDatas" :key="item.id" :style="cardAnimationDelay(index)"
+            style="width: 350px; background-color: #ffffff;" @click="handleCardClick(item)">
             <Cards :title="item.title" :name="item.name" :content="item.content" :img="item.img" />
         </div>
     </div>
@@ -234,6 +261,7 @@ const seasonEmojis = {
 }
 
 .card-container {
+    height: 250px;
     cursor: pointer;
     opacity: 0;
     transform: translateY(30px) scale(0.95);
@@ -246,6 +274,10 @@ const seasonEmojis = {
     transform-style: preserve-3d;
     backface-visibility: hidden;
     position: relative;
+    /* 添加以下样式实现垂直水平居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card-container:hover {
@@ -261,9 +293,9 @@ const seasonEmojis = {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.3) 0%, 
-                rgba(255, 255, 255, 0) 60%);
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0) 60%);
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
@@ -340,14 +372,25 @@ const seasonEmojis = {
     left: 24px;
     font-size: 26px;
     transform: rotate(-10deg);
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
     animation: float 4s ease-in-out infinite;
 }
 
-.season-decoration.spring { color: #88c773; }
-.season-decoration.summer { color: #ff7e67; }
-.season-decoration.autumn { color: #e6a147; }
-.season-decoration.winter { color: #77b5d9; }
+.season-decoration.spring {
+    color: #88c773;
+}
+
+.season-decoration.summer {
+    color: #ff7e67;
+}
+
+.season-decoration.autumn {
+    color: #e6a147;
+}
+
+.season-decoration.winter {
+    color: #77b5d9;
+}
 
 /* 关闭按钮 */
 .blog-close {
@@ -374,42 +417,105 @@ const seasonEmojis = {
     margin-top: -2px;
 }
 
-.blog-close.spring { background: rgba(136, 199, 115, 0.15); }
-.blog-close.summer { background: rgba(255, 126, 103, 0.15); }
-.blog-close.autumn { background: rgba(230, 161, 71, 0.15); }
-.blog-close.winter { background: rgba(119, 181, 217, 0.15); }
+.blog-close.spring {
+    background: rgba(136, 199, 115, 0.15);
+}
 
-.blog-close:hover { transform: scale(1.1); }
-.blog-close.spring:hover { background: rgba(136, 199, 115, 0.25); }
-.blog-close.summer:hover { background: rgba(255, 126, 103, 0.25); }
-.blog-close.autumn:hover { background: rgba(230, 161, 71, 0.25); }
-.blog-close.winter:hover { background: rgba(119, 181, 217, 0.25); }
+.blog-close.summer {
+    background: rgba(255, 126, 103, 0.15);
+}
+
+.blog-close.autumn {
+    background: rgba(230, 161, 71, 0.15);
+}
+
+.blog-close.winter {
+    background: rgba(119, 181, 217, 0.15);
+}
+
+.blog-close:hover {
+    transform: scale(1.1);
+}
+
+.blog-close.spring:hover {
+    background: rgba(136, 199, 115, 0.25);
+}
+
+.blog-close.summer:hover {
+    background: rgba(255, 126, 103, 0.25);
+}
+
+.blog-close.autumn:hover {
+    background: rgba(230, 161, 71, 0.25);
+}
+
+.blog-close.winter:hover {
+    background: rgba(119, 181, 217, 0.25);
+}
 
 /* 动画 */
 @keyframes cardAppear {
-    0% { opacity: 0; transform: translateY(50px) scale(0.9); }
-    60% { opacity: 1; }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+
+    60% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fadeInRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes float {
-    0%, 100% { transform: rotate(-10deg) translateY(0); }
-    50% { transform: rotate(-5deg) translateY(-5px); }
+
+    0%,
+    100% {
+        transform: rotate(-10deg) translateY(0);
+    }
+
+    50% {
+        transform: rotate(-5deg) translateY(-5px);
+    }
 }
 
 /* 过渡动画 */
@@ -425,10 +531,23 @@ const seasonEmojis = {
 }
 
 /* 滚动条样式 */
-.blog-body::-webkit-scrollbar { width: 5px; }
-.blog-body::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
-.blog-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-.blog-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.blog-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.blog-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.blog-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.blog-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
 
 /* 响应式设计 */
 @media (max-width: 1100px) {
@@ -436,8 +555,16 @@ const seasonEmojis = {
         width: 90%;
         padding: 30px;
     }
-    .welcome, .photo { width: 45%; margin: 0 2.5%; }
-    .photo img { width: 100%; }
+
+    .welcome,
+    .photo {
+        width: 45%;
+        margin: 0 2.5%;
+    }
+
+    .photo img {
+        width: 100%;
+    }
 }
 
 @media (max-width: 768px) {
@@ -446,7 +573,13 @@ const seasonEmojis = {
         height: auto;
         align-items: center;
     }
-    .welcome, .photo { width: 90%; margin: 20px 0; }
+
+    .welcome,
+    .photo {
+        width: 90%;
+        margin: 20px 0;
+    }
+
     .link {
         position: relative;
         margin-top: 30px;
