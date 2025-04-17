@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fingalden.bolg.mapper.PostsMapper">
+
+    <resultMap id="BaseResultMap" type="com.fingalden.bolg.domain.Posts">
+            <id property="id" column="id" />
+            <result property="title" column="title" />
+            <result property="content" column="content" />
+            <result property="excerpt" column="excerpt" />
+            <result property="status" column="status" />
+            <result property="createdAt" column="created_at" />
+            <result property="publishedAt" column="published_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,title,content,excerpt,status,created_at,
+        published_at
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from posts
+        where  id = #{id} 
+    </select>
+    <select id="selectList" resultType="com.fingalden.bolg.domain.Posts">
+        select
+        <include refid="Base_Column_List" />
+        from posts
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from posts
+        where  id = #{id} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.fingalden.bolg.domain.Posts" useGeneratedKeys="true">
+        insert into posts
+        ( id,title,content,excerpt,status,created_at,
+        published_at)
+        values (#{id},#{title},#{content},#{excerpt},#{status},#{createdAt},
+        #{publishedAt})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.fingalden.bolg.domain.Posts" useGeneratedKeys="true">
+        insert into posts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="title != null">title,</if>
+                <if test="content != null">content,</if>
+                <if test="excerpt != null">excerpt,</if>
+                <if test="status != null">status,</if>
+                <if test="createdAt != null">created_at,</if>
+                <if test="publishedAt != null">published_at,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id},</if>
+                <if test="title != null">#{title},</if>
+                <if test="content != null">#{content},</if>
+                <if test="excerpt != null">#{excerpt},</if>
+                <if test="status != null">#{status},</if>
+                <if test="createdAt != null">#{createdAt},</if>
+                <if test="publishedAt != null">#{publishedAt},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.fingalden.bolg.domain.Posts">
+        update posts
+        <set>
+                <if test="title != null">
+                    title = #{title},
+                </if>
+                <if test="content != null">
+                    content = #{content},
+                </if>
+                <if test="excerpt != null">
+                    excerpt = #{excerpt},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="createdAt != null">
+                    created_at = #{createdAt},
+                </if>
+                <if test="publishedAt != null">
+                    published_at = #{publishedAt},
+                </if>
+        </set>
+        where   id = #{id} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.fingalden.bolg.domain.Posts">
+        update posts
+        set 
+            title =  #{title},
+            content =  #{content},
+            excerpt =  #{excerpt},
+            status =  #{status},
+            created_at =  #{createdAt},
+            published_at =  #{publishedAt}
+        where   id = #{id} 
+    </update>
+</mapper>

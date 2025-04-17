@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.Fingalden.bolg</groupId>
-    <artifactId>BolgBackend</artifactId>
+    <artifactId>BlogBackend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>BolgBackend</name>
     <description>BolgBackend</description>
