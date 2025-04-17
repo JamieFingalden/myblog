@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 public class ChatController {
     private final ChatClient chatClient;
 
-    @RequestMapping("/chat")
+    @RequestMapping(value = "/chat", produces = "text/html;charset=utf-8")
     public Flux<String> chat(String prompt){
         return chatClient
                 .prompt()
