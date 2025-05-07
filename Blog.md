@@ -205,5 +205,125 @@ DELETE /posts
 
 ### 返回数据结构
 
+# Chat
+
+## GET Chat
+
+GET /AIChat/chat
+
+### 请求参数
+
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|prompt|query|string| 否 |none|
+
+> 返回示例
+
+> 200 Response
+
+```
+"<think> 好吧，用户又发了一个“helloworld”。看起来他对我很熟悉了。之前我回复过类似的信息，可能他想再次确认我的回应能力或者只是想聊聊天。\n我要考虑他的真实需求是什么。也许他真的需要帮助解决某个问题，但又不想直接提出问题，所以用这样的问候方式来保持对话的开放性。\n如果是这样的话，我可以继续保持友好的态度，并邀请他提出具体的问题或分享他的想法。\n同时，我应该确保回复简洁明了，让用户感到方便继续交流。 </think>\n你好！有什么我可以帮助你的吗？如果你有任何问题或想分享自己的想法，请随时告诉我。"
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|Inline|
+
+### 返回数据结构
+
 # 数据模型
+
+<h2 id="tocS_Pet">Pet</h2>
+
+<a id="schemapet"></a>
+<a id="schema_Pet"></a>
+<a id="tocSpet"></a>
+<a id="tocspet"></a>
+
+```json
+{
+  "id": 1,
+  "category": {
+    "id": 1,
+    "name": "string"
+  },
+  "name": "doggie",
+  "photoUrls": [
+    "string"
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "name": "string"
+    }
+  ],
+  "status": "available"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|true|none||宠物ID编号|
+|category|[Category](#schemacategory)|true|none||分组|
+|name|string|true|none||名称|
+|photoUrls|[string]|true|none||照片URL|
+|tags|[[Tag](#schematag)]|true|none||标签|
+|status|string|true|none||宠物销售状态|
+
+#### 枚举值
+
+|属性|值|
+|---|---|
+|status|available|
+|status|pending|
+|status|sold|
+
+<h2 id="tocS_Category">Category</h2>
+
+<a id="schemacategory"></a>
+<a id="schema_Category"></a>
+<a id="tocScategory"></a>
+<a id="tocscategory"></a>
+
+```json
+{
+  "id": 1,
+  "name": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|false|none||分组ID编号|
+|name|string|false|none||分组名称|
+
+<h2 id="tocS_Tag">Tag</h2>
+
+<a id="schematag"></a>
+<a id="schema_Tag"></a>
+<a id="tocStag"></a>
+<a id="tocstag"></a>
+
+```json
+{
+  "id": 1,
+  "name": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|false|none||标签ID编号|
+|name|string|false|none||标签名称|
 
