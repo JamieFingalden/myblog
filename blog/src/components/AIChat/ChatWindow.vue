@@ -1,5 +1,32 @@
 <script setup>
-import { ref, onMounted, onUpdated, nextTick } from 'vue';
+import { ref, onMounted, onUpdated, nextTick, watch, onUnmounted } from 'vue';
+
+// 用于跟踪哪些思考内容被展开
+const expandedThinks = ref({});
+// 用于跟踪思考内容是否已完成
+const thinkCompleted = ref({});
+// 用于存储滚动定时器
+const scrollIntervalRef = ref(null);
+
+// 切换思考内容的展开/折叠状态
+function toggleThink(index) {
+  expandedThinks.value[index] = !expandedThinks.value[index];
+}
+
+// 格式化消息内容，移除<think>标签
+function formatMessage(content) {
+  if (!content) return '';
+  
+  // 移除<think>...</think>标签及其内容
+  let formattedContent = content.replace(/<think>[\s\S]*?<\/think>/g, '');
+  
+  // 添加流式输出的光标（如果需要）
+  if (props.conversation.messages.some(msg => msg.isStreaming)) {
+    formattedContent += '<span class="streaming-cursor"></span>';
+  }
+  
+  return formattedContent;
+}
 
 // 定义props和emit
 const props = defineProps({
@@ -13,6 +40,77 @@ const props = defineProps({
   }
 });
 
+// 专门监听流式输出状态，确保在流式输出过程中持续滚动
+watch(() => props.conversation.messages.some(msg => msg.isStreaming), (isStreaming) => {
+  // 清除之前的定时器
+  if (scrollIntervalRef.value) {
+    clearInterval(scrollIntervalRef.value);
+    scrollIntervalRef.value = null;
+  }
+  
+  if (isStreaming) {
+    // 立即滚动一次
+    scrollToBottom(true);
+    
+    // 如果有消息正在流式输出，设置一个定时器定期滚动到底部
+    scrollIntervalRef.value = setInterval(() => {
+      if (props.conversation.messages.some(msg => msg.isStreaming)) {
+        scrollToBottom(true);
+      } else {
+        clearInterval(scrollIntervalRef.value);
+        scrollIntervalRef.value = null;
+      }
+    }, 100); // 每100毫秒滚动一次
+  }
+}, { immediate: true });
+
+// 监听消息变化，处理思考部分的展开和收起
+watch(() => props.conversation.messages, (newMessages, oldMessages) => {
+  // 处理新增的消息
+  if (newMessages.length > (oldMessages?.length || 0)) {
+    const newIndex = newMessages.length - 1;
+    const newMessage = newMessages[newIndex];
+    
+    // 如果是AI消息且正在流式传输，则默认展开思考部分
+    if (newMessage.sender === 'ai' && newMessage.isStreaming) {
+      expandedThinks.value[newIndex] = true;
+      thinkCompleted.value[newIndex] = false;
+    }
+    
+    // 新消息添加后滚动到底部
+    scrollToBottom(true);
+  }
+  
+  // 检查所有消息的思考内容变化
+  newMessages.forEach((message, index) => {
+    if (message.sender === 'ai' && message.isStreaming) {
+      const oldMessage = oldMessages?.[index];
+      
+      // 如果思考内容存在且与上一次相同，但主内容增加了，说明思考已完成，开始输出主内容
+      if (message.thinkContent && 
+          oldMessage && 
+          message.thinkContent === oldMessage.thinkContent && 
+          message.content.length > oldMessage.content.length &&
+          !thinkCompleted.value[index]) {
+        // 标记思考已完成
+        thinkCompleted.value[index] = true;
+        // 收起思考部分
+        nextTick(() => {
+          expandedThinks.value[index] = false;
+          scrollToBottom(true); // 收起思考部分后滚动到底部
+        });
+      }
+      
+      // 消息内容有更新时滚动到底部
+      if (oldMessage && 
+          (message.content.length > oldMessage.content.length || 
+           message.thinkContent?.length > (oldMessage.thinkContent?.length || 0))) {
+        scrollToBottom(true); // 直接调用，强制滚动
+      }
+    }
+  });
+}, { deep: true });
+
 const emit = defineEmits(['send-message']);
 
 // 响应式数据
@@ -21,9 +119,23 @@ const loading = ref(false);
 const messagesContainer = ref(null);
 
 // 方法
-function scrollToBottom() {
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+function scrollToBottom(force = false) {
+  if (!messagesContainer.value) return;
+  
+  const container = messagesContainer.value;
+  const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+  
+  // 如果用户已经滚动到接近底部，或者强制滚动
+  if (isNearBottom || force) {
+    // 使用 requestAnimationFrame 确保在下一帧渲染前执行滚动
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+      
+      // 双重保险：再次使用 setTimeout 确保滚动生效
+      setTimeout(() => {
+        container.scrollTop = container.scrollHeight;
+      }, 10);
+    });
   }
 }
 
@@ -36,6 +148,8 @@ function sendMessage() {
   });
   
   userInput.value = '';
+  // 发送消息后立即滚动到底部
+  scrollToBottom(true);
 }
 
 // 生命周期钩子
@@ -55,13 +169,24 @@ function autoResize() {
 }
 
 onMounted(() => {
-  scrollToBottom();
+  scrollToBottom(true);
   autoResize();
 });
 
 onUpdated(() => {
-  scrollToBottom();
+  // 如果有消息正在流式输出，则滚动到底部
+  if (props.conversation.messages.some(msg => msg.isStreaming)) {
+    scrollToBottom(true);
+  }
   autoResize();
+});
+
+// 组件卸载时清除定时器
+onUnmounted(() => {
+  if (scrollIntervalRef.value) {
+    clearInterval(scrollIntervalRef.value);
+    scrollIntervalRef.value = null;
+  }
 });
 </script>
 
@@ -83,10 +208,24 @@ onUpdated(() => {
     <div class="chat-messages" ref="messagesContainer">
       <transition-group name="message-fade" tag="div" class="messages-container">
         <div v-for="(message, index) in conversation.messages" :key="index" 
-             :class="['message', message.sender === 'user' ? 'user-message' : 'ai-message']">
-          <div class="message-content">
-            {{ message.content }}
+             :class="['message', message.sender === 'user' ? 'user-message' : 'ai-message', {'streaming': message.isStreaming}]">
+          
+          <!-- 显示AI思考过程 - 调整位置和样式 -->
+          <div v-if="message.thinkContent && message.sender === 'ai'" class="think-container">
+            <div class="think-header" @click="toggleThink(index)">
+              <svg :class="['think-icon', {'rotated': expandedThinks[index]}]" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+              </svg>
+              <span>{{ expandedThinks[index] ? '收起思考过程' : '查看思考过程' }}</span>
+            </div>
+            <div v-show="expandedThinks[index] || message.isStreaming" class="think-content">
+              <p><span class="think-label">思考：</span>{{ message.thinkContent }}</p>
+            </div>
           </div>
+          
+          <div class="message-content" v-html="formatMessage(message.content)">
+          </div>
+          
           <div class="message-time">{{ message.time }}</div>
         </div>
       </transition-group>
@@ -182,6 +321,7 @@ onUpdated(() => {
   flex-direction: column;
   gap: 15px;
   background-color: #f9f9f9;
+  scroll-behavior: smooth; /* 添加平滑滚动效果 */
 }
 
 .message {
@@ -398,4 +538,81 @@ onUpdated(() => {
     height: 28px;
   }
 }
+
+/* 流式输出相关样式 */
+.streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background-color: #333;
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming {
+  border-color: #ddd;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* AI思考部分的样式 */
+.think-container {
+  margin-bottom: 10px;
+  border-bottom: 1px dashed #e0e0e0;
+  padding-bottom: 8px;
+  text-align: left;
+}
+
+.think-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #666;
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.think-icon {
+  margin-right: 5px;
+  transition: transform 0.3s ease;
+}
+
+.think-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.think-content {
+  margin-top: 8px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
 </style>
+
+// 专门监听流式输出状态，确保在流式输出过程中持续滚动
+watch(() => props.conversation.messages.some(msg => msg.isStreaming), (isStreaming) => {
+  if (isStreaming) {
+    // 如果有消息正在流式输出，设置一个定时器定期滚动到底部
+    const scrollInterval = setInterval(() => {
+      if (props.conversation.messages.some(msg => msg.isStreaming)) {
+        scrollToBottom();
+      } else {
+        clearInterval(scrollInterval);
+      }
+    }, 100); // 每100毫秒滚动一次
+    
+    // 确保组件销毁时清除定时器
+    onUnmounted(() => {
+      clearInterval(scrollInterval);
+    });
+  }
+}, { immediate: true });
