@@ -20,9 +20,14 @@ spring:
     ollama:
       base-url: http://localhost:11434
       chat:
-        model: deepseek-r1:1.5b
+        model: deepseek-r1:7b
+
 
 logging:
   level:
     org.springframework.ai.chat.client.advisor: debug
     com.fingalden.bolg: debug
+
+jwt:
+  tokenSignKey: JamieBolg # 密钥
+  tokenExpiration: 3600000 # 访问令牌过期时间（毫秒）
