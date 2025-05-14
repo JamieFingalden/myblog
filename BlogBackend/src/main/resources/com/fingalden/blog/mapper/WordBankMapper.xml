@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fingalden.blog.mapper.WordBankMapper">
+
+    <resultMap id="BaseResultMap" type="com.fingalden.blog.domain.WordBank">
+            <id property="english" column="english" />
+            <result property="chinese" column="chinese" />
+            <result property="example" column="example" />
+            <result property="date" column="date" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        english,chinese,example,date
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from word_bank
+        where  english = #{english} 
+    </select>
+    <select id="selectAllWorks" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from word_bank
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from word_bank
+        where  english = #{english} 
+    </delete>
+    <insert id="insert" keyColumn="english" keyProperty="english" parameterType="com.fingalden.blog.domain.WordBank" useGeneratedKeys="true">
+        insert into word_bank
+        ( english,chinese,example,date)
+        values (#{english},#{chinese},#{example},#{date})
+    </insert>
+    <insert id="insertSelective" keyColumn="english" keyProperty="english" parameterType="com.fingalden.blog.domain.WordBank" useGeneratedKeys="true">
+        insert into word_bank
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="english != null">english,</if>
+                <if test="chinese != null">chinese,</if>
+                <if test="example != null">example,</if>
+                <if test="date != null">date,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="english != null">#{english},</if>
+                <if test="chinese != null">#{chinese},</if>
+                <if test="example != null">#{example},</if>
+                <if test="date != null">#{date},</if>
+        </trim>
+    </insert>
+    <insert id="insertWords">
+        insert into word_bank
+        ( english,chinese,example)
+        values
+        <foreach collection="words" item="word" separator=",">
+            (#{word.english},#{word.chinese},#{word.example})
+        </foreach>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.fingalden.blog.domain.WordBank">
+        update word_bank
+        <set>
+                <if test="chinese != null">
+                    chinese = #{chinese},
+                </if>
+                <if test="example != null">
+                    example = #{example},
+                </if>
+                <if test="date != null">
+                    date = #{date},
+                </if>
+        </set>
+        where   english = #{english} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.fingalden.blog.domain.WordBank">
+        update word_bank
+        set 
+            chinese =  #{chinese},
+            example =  #{example},
+            date =  #{date}
+        where   english = #{english} 
+    </update>
+</mapper>
