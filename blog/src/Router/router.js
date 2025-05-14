@@ -21,6 +21,39 @@ const router = createRouter({
       path: '/chat',
       name: 'chat',
       component: () => import('../View/AIChat/Chat.vue')
+    },
+    // 添加作品集页面的路由
+    {
+      path: '/collection',
+      name: 'collection',
+      component: () => import('../components/Collection/Collection.vue')
+    },
+    {
+      path: '/learnEnglish',
+      name: 'learnEnglish',
+      component: () => import('../components/Collection/LearnEnglish/LearnEnglish.vue'),
+      children: [
+        {
+          path: '',
+          name: 'englishHome',
+          component: () => import('../View/Collection/LearnEnglish/Home.vue')
+        },
+        {
+          path: 'add',
+          name: 'addWords',
+          component: () => import('../View/Collection/LearnEnglish/AddWords.vue')
+        },
+        {
+          path: 'practice',
+          name: 'practice',
+          component: () => import('../View/Collection/LearnEnglish/Practice.vue')
+        },
+        {
+          path: 'result',
+          name: 'result',
+          component: () => import('../View/Collection/LearnEnglish/Result.vue')
+        }
+      ]
     }
   ]
 })

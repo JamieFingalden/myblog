@@ -122,7 +122,7 @@ const seasonEmojis = {
                     career.
                 </span>
             </div>
-            <div class="link animate-slide-up">
+            <!-- <div class="link animate-slide-up">
                 <div class="linkBox"><a href="https://space.bilibili.com/33594443"><img @mouseenter="getFocusBilibili"
                             @mouseleave="leaveBilibili" :src="bilibiliPng" alt="子非鱼的bilibili空间"></a></div>
                 <div class="linkBox"><a
@@ -131,7 +131,7 @@ const seasonEmojis = {
                 </div>
                 <div class="linkBox"><a href="https://github.com/JamieFingalden"><img @mouseenter="getFocusgithub"
                             @mouseleave="leavegithub" :src="githubPng" alt=""></a></div>
-            </div>
+            </div> -->
         </div>
         <div class="photo animate-fade-in-right">
             <img src="../../assets/photo/简历照.png" alt="">

@@ -4,23 +4,29 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const navigateToChat = () => {
-  router.push('/chat');
+    router.push('/chat');
 };
 </script>
 
 <template>
-  <div class="Navbox">
-    <div class="logo"><img src="../assets/logo/white.png" alt="logo"></div>
-    
-    <div class="nav-links">
-      <router-link to="/" active-class="active"><div class="logo nav-item">HOME</div></router-link>
-      <router-link to="/weather" active-class="active"><div class="logo nav-item">WEATHER</div></router-link>
-      <div class="logo nav-item">COLLECTION</div>
-      <div class="logo nav-item">RESUME</div>
+    <div class="Navbox">
+        <div class="logo"><img src="../assets/logo/white.png" alt="logo"></div>
+
+        <div class="nav-links">
+            <router-link to="/" active-class="active">
+                <div class="logo nav-item">HOME</div>
+            </router-link>
+            <router-link to="/weather" active-class="active">
+                <div class="logo nav-item">WEATHER</div>
+            </router-link>
+            <router-link to="/collection" active-class="active">
+                <div class="logo nav-item">COLLECTION</div>
+            </router-link>
+            <div class="logo nav-item">RESUME</div>
+        </div>
+
+        <div class="talk" @click="navigateToChat"><span>Let's Talk 💬</span></div>
     </div>
-    
-    <div class="talk" @click="navigateToChat"><span>Let's Talk 💬</span></div>
-  </div>
 </template>
 
 <style scoped>
@@ -154,7 +160,7 @@ const navigateToChat = () => {
     .nav-links {
         gap: 1.25rem;
     }
-    
+
     .logo img {
         width: 6.25rem;
     }
@@ -164,7 +170,7 @@ const navigateToChat = () => {
     .nav-links {
         gap: 0.9375rem;
     }
-    
+
     .talk {
         width: 7.5rem;
     }
