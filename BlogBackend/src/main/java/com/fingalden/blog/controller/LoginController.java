@@ -1,6 +1,7 @@
 package com.fingalden.blog.controller;
 
 import com.fingalden.blog.domain.User;
+import com.fingalden.blog.service.LoginService;
 import com.fingalden.blog.utils.JWTUtil;
 import com.fingalden.blog.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/login")
@@ -19,10 +22,21 @@ public class LoginController {
         this.jwtUtil = jwtUtil;
     }
 
+    @Autowired
+    private LoginService loginService;
+
     @PostMapping
     public Result login(@RequestBody User user) {
-        user = new User(1L, "admin", "123456");
-        String token = jwtUtil.createToken(user.getId());
-        return Result.success(token);
+        if (Objects.equals(user.getUsername(), "游客")) {
+            String token = jwtUtil.createToken(user.getId());
+            return Result.success(token);
+        }
+        return loginService.login(user);
+
+    }
+
+    @PostMapping("/register")
+    public Result register(@RequestBody User user) {
+        return loginService.register(user);
     }
 }
