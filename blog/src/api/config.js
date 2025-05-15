@@ -1,16 +1,41 @@
 import axios from 'axios'
 
+// 创建axios实例
 const request = axios.create({
-    baseURL: 'http://localhost:8080',  // 确保使用完整的URL（包含http://）
-    timeout: 5000,
-    withCredentials: true  // 允许跨域携带cookie
+    baseURL: 'http://localhost:8080',
+    timeout: 10000
 })
 
-// 添加响应拦截器，统一处理错误
-request.interceptors.response.use(
-    response => response,
+// 请求拦截器
+request.interceptors.request.use(
+    config => {
+        // 从localStorage获取token
+        const token = localStorage.getItem('Authorization')
+        // 如果token存在，则添加到请求头
+        if (token) {
+            // 确保headers对象存在
+            if (!config.headers) {
+                config.headers = {}
+            }
+            config.headers['Authorization'] = token
+        } else {
+            console.log('未找到token')
+        }
+
+        return config
+    },
     error => {
-        console.error('请求错误:', error.message)
+        console.log('请求拦截器错误:', error)
+        return Promise.reject(error)
+    }
+)
+
+// 响应拦截器
+request.interceptors.response.use(
+    response => {
+        return response.data
+    },
+    error => {
         return Promise.reject(error)
     }
 )
