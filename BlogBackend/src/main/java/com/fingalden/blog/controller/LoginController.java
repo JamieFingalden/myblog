@@ -25,14 +25,13 @@ public class LoginController {
     @Autowired
     private LoginService loginService;
 
-    @PostMapping
+    @PostMapping("/login")
     public Result login(@RequestBody User user) {
         if (Objects.equals(user.getUsername(), "游客")) {
             String token = jwtUtil.createToken(user.getId());
             return Result.success(token);
         }
         return loginService.login(user);
-
     }
 
     @PostMapping("/register")

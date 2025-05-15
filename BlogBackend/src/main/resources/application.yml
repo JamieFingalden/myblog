@@ -32,4 +32,4 @@ logging:
 
 jwt:
   tokenSignKey: JamieBolg # 密钥
-  tokenExpiration: 3600000 # 访问令牌过期时间（毫秒）
+  tokenExpiration: 1 # 访问令牌过期时间（毫秒）

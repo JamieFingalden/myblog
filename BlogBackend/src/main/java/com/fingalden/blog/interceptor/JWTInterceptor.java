@@ -16,11 +16,15 @@ public class JWTInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("Authorization");
-        if (token == null || jwtUtil.isExpiration(token)) {
+        if (token == null || jwtUtil.isExpiration(token.split(" ")[1])) {
+            // 设置响应的内容类型为 JSON
+            response.setContentType("application/json;charset=UTF-8");
+            // 将错误信息写入响应体
             Result.error("token is null or expired");
-            return false;
-        }else {
-            return true;
+            System.out.println("token is null or expired");
+            return false; // 阻止请求继续执行
+        } else {
+            return true; // 允许请求继续执行
         }
     }
 }
