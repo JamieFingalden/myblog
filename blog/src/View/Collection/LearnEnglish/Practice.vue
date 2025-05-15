@@ -22,7 +22,7 @@ const roundResults = ref({
 
 // 获取按日期分组的单词
 const wordsByDate = computed(() => {
-  return englishWordsStore.getWordsByDate();
+  return englishWordsStore.wordsByDate;
 });
 
 // 获取日期列表
@@ -55,12 +55,12 @@ onMounted(() => {
   // 从路由参数获取选择的日期
   const routeDate = router.currentRoute.value.query.date;
   const routeDates = router.currentRoute.value.query.dates;
-  
+
   if (routeDates) {
     // 处理多个日期的情况
     const dateArray = routeDates.split(',');
     selectedDate.value = dateArray.join(', '); // 用于显示
-    
+
     // 合并多个日期的单词
     let allWords = [];
     dateArray.forEach(date => {
@@ -68,7 +68,7 @@ onMounted(() => {
         allWords = [...allWords, ...wordsByDate.value[date]];
       }
     });
-    
+
     if (allWords.length > 0) {
       practiceWords.value = allWords;
     } else if (dateList.value.length > 0) {
@@ -113,7 +113,20 @@ const checkAnswer = () => {
   userAnswers.value[currentWordIndex.value] = trimmedInput;
 
   // 检查是否正确（不区分大小写）
-  isCorrect.value = trimmedInput.toLowerCase() === trimmedAnswer.toLowerCase();
+  let isAnswerCorrect = false;
+
+  if (currentRound.value === 1) {
+    // 英文→中文：检查用户输入是否匹配任一中文翻译
+    const possibleAnswers = trimmedAnswer.split('、');
+    isAnswerCorrect = possibleAnswers.some(answer =>
+      trimmedInput.toLowerCase() === answer.trim().toLowerCase()
+    );
+  } else {
+    // 中文→英文：仍然是精确匹配
+    isAnswerCorrect = trimmedInput.toLowerCase() === trimmedAnswer.toLowerCase();
+  }
+
+  isCorrect.value = isAnswerCorrect;
 
   // 更新正确数量
   if (isCorrect.value) {
