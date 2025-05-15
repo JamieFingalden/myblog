@@ -17,6 +17,7 @@ public class WordServiceImpl implements WordService {
     @Override
     public Result getWordList() {
         List<WordBank> wordBanks = wordBankMapper.selectAllWorks();
+        System.out.println(wordBanks);
         return Result.success(wordBanks);
     }
 

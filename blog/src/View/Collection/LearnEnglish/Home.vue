@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEnglishWordsStore } from '../../../stores/englishWords';
+import { wordApi } from '../../../api/word';
 
 const router = useRouter();
 const englishWordsStore = useEnglishWordsStore();
@@ -20,6 +21,8 @@ const sortedWordsByDate = computed(() => {
 });
 // 修改为数组，支持多选
 const selectedDates = ref([]);
+const isLoading = ref(false);
+const errorMessage = ref('');
 
 // 导航到添加单词页面
 const goToAddWords = () => {
@@ -59,9 +62,60 @@ const selectWordGroup = (date) => {
   }
 };
 
-// 获取已保存的单词数量
+// 获取单词列表
+const fetchWordsList = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
+
+  try {
+    const response = await wordApi.getAllWord();
+    console.log('获取单词列表响应:', response);
+
+    // 检查响应格式并打印更详细的日志
+    if (response) {
+      console.log('响应状态:', response.status);
+      console.log('响应数据类型:', typeof response.data);
+      console.log('响应数据:', JSON.stringify(response.data).substring(0, 200) + '...');
+    }
+
+    // 更健壮的数据处理
+    if (response && response.data) {
+      let wordsData;
+
+      // 处理不同的响应格式
+      if (response.code === 200 && Array.isArray(response.data)) {
+        // 标准格式 {code: 200, data: [...]}
+        wordsData = response.data;
+      } else if (Array.isArray(response.data)) {
+        // 直接返回数组
+        wordsData = response.data;
+      } else if (typeof response.data === 'object' && response.data.code === 200 && Array.isArray(response.data.data)) {
+        // 嵌套格式 {data: {code: 200, data: [...]}}
+        wordsData = response.data.data;
+      } else {
+        throw new Error('未知的响应数据格式');
+      }
+
+      // 使用 Pinia store 的 $patch 方法更新状态
+      englishWordsStore.$patch((state) => {
+        state.wordsList = wordsData;
+      });
+
+      console.log('成功获取单词列表并更新store');
+    } else {
+      throw new Error('响应数据为空或格式不正确');
+    }
+  } catch (error) {
+    errorMessage.value = `获取单词列表失败: ${error.message || '未知错误'}`;
+    console.error('获取单词列表失败:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 组件挂载时获取单词列表
 onMounted(() => {
-  englishWordsStore.initWords();
+  fetchWordsList();
 });
 
 // 计算当前选中的单词总数
@@ -93,7 +147,17 @@ const filteredWordsByDate = computed(() => {
 </script>
 
 <template>
+  <!-- 添加加载状态和错误信息显示 -->
   <div class="home-container">
+    <div v-if="isLoading" class="loading-indicator">
+      <p>加载中...</p>
+    </div>
+
+    <div v-if="errorMessage" class="error-message">
+      <p>{{ errorMessage }}</p>
+      <button @click="fetchWordsList" class="retry-btn">重试</button>
+    </div>
+
     <div class="welcome-section">
       <h2>欢迎使用英语单词学习工具</h2>
       <p>这是一个帮助你记忆英语单词的简单工具，通过添加单词和反复练习来提高你的词汇量。</p>
@@ -108,8 +172,6 @@ const filteredWordsByDate = computed(() => {
         </div>
       </div>
     </div>
-
-    <!-- 现有的欢迎和统计部分保持不变 -->
 
     <!-- 添加单词组选择部分 -->
     <div class="word-groups-section" v-if="hasWords">
@@ -173,130 +235,178 @@ const filteredWordsByDate = computed(() => {
           </div>
         </div>
       </div>
-
-      <!-- 不分组显示所有单词 -->
-      <div v-else class="words-table">
-        <table>
-          <thead>
-            <tr>
-              <th>英文</th>
-              <th>中文</th>
-              <th>例句</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(word, index) in wordsList" :key="index">
-              <td>{{ word.english }}</td>
-              <td>{{ word.chinese }}</td>
-              <td class="example-cell">{{ word.example || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* 添加新样式 */
+.loading-indicator {
+  text-align: center;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.retry-btn {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  background-color: #b71c1c;
+}
+
 .home-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 .welcome-section {
   text-align: center;
-  max-width: 800px;
-}
-
-.welcome-section h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.welcome-section p {
-  font-size: 1.1rem;
-  color: #666;
-  line-height: 1.6;
+  margin-bottom: 2rem;
 }
 
 .stats-section {
-  width: 100%;
   display: flex;
   justify-content: center;
-  margin: 1rem 0;
+  margin-bottom: 2rem;
 }
 
 .stat-card {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 1rem;
   display: flex;
   align-items: center;
-  background-color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  min-width: 250px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
-  font-size: 2.5rem;
-  margin-right: 1.5rem;
+  font-size: 2rem;
+  margin-right: 1rem;
 }
 
 .stat-info h3 {
   margin: 0;
-  font-size: 1.2rem;
-  color: #555;
+  font-size: 1rem;
+  color: #666;
 }
 
 .stat-value {
-  font-size: 1.8rem;
+  margin: 0;
+  font-size: 1.5rem;
   font-weight: bold;
-  color: #1a73e8;
-  margin: 0.5rem 0 0 0;
+  color: #333;
+}
+
+.section-title {
+  margin-bottom: 1rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.word-groups-section {
+  margin-bottom: 2rem;
+}
+
+.word-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+  /* 添加居中对齐 */
+}
+
+.word-group-card {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.word-group-card:hover {
+  background-color: #e0e0e0;
+}
+
+.word-group-card.selected {
+  border-color: #1a73e8;
+  background-color: #e8f0fe;
+}
+
+.word-group-date {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.word-group-count {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.selection-info {
+  margin-top: 1rem;
+  color: #666;
+  font-style: italic;
 }
 
 .action-section {
   display: flex;
-  gap: 1.5rem;
-  margin-top: 1rem;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   padding: 0.8rem 1.5rem;
-  border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 500;
+  border: none;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
 .btn-icon {
-  margin-right: 0.8rem;
+  margin-right: 0.5rem;
   font-size: 1.2rem;
 }
 
 .add-btn {
-  background-color: #1a73e8;
+  background-color: #4caf50;
   color: white;
 }
 
 .add-btn:hover {
-  background-color: #1557b0;
+  background-color: #388e3c;
 }
 
 .practice-btn {
-  background-color: #34a853;
+  background-color: #1a73e8;
   color: white;
 }
 
 .practice-btn:hover {
-  background-color: #2d8e47;
+  background-color: #1557b0;
 }
 
 .practice-btn:disabled {
@@ -305,41 +415,14 @@ const filteredWordsByDate = computed(() => {
 }
 
 .tip-section {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #fff8e1;
-  border-left: 4px solid #ffca28;
-  border-radius: 4px;
-}
-
-.tip-section p {
-  margin: 0;
-  color: #5f4339;
-}
-
-@media (max-width: 600px) {
-  .action-section {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .action-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* 单词列表样式 */
-.words-list-section {
-  width: 100%;
-}
-
-.section-title {
   text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  color: #333;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.words-list-section {
+  margin-bottom: 2rem;
 }
 
 .date-group {
@@ -347,64 +430,73 @@ const filteredWordsByDate = computed(() => {
 }
 
 .date-title {
-  font-size: 1.2rem;
-  color: #555;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 0.5rem;
+  color: #333;
 }
 
 .words-table {
-  width: 100%;
   overflow-x: auto;
+  border-radius: 8px;
+  /* 添加圆角 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  /* 添加轻微阴影效果 */
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
+  border-collapse: separate;
+  /* 修改为separate以支持圆角 */
+  border-spacing: 0;
   overflow: hidden;
-  table-layout: fixed;
+  /* 确保内容不会溢出圆角 */
 }
 
 th,
 td {
-  padding: 0.8rem 1rem;
+  padding: 0.8rem;
   text-align: left;
+  border-bottom: 1px solid #eee;
 }
 
-/* 设置列宽比例为1:1:3 */
+/* 设置列宽比例为2:2:3 */
 th:nth-child(1),
 td:nth-child(1) {
-  width: 25%;
-  /* 英文列占20% */
+  width: 28.5%;
+  /* 2/7的比例 */
 }
 
 th:nth-child(2),
 td:nth-child(2) {
-  width: 25%;
-  /* 中文列占20% */
+  width: 28.5%;
+  /* 2/7的比例 */
 }
 
 th:nth-child(3),
 td:nth-child(3) {
-  width: 50%;
-  /* 例句列占60% */
+  width: 43%;
+  /* 3/7的比例 */
+}
+
+/* 添加表格圆角 */
+th:first-child {
+  border-top-left-radius: 8px;
+}
+
+th:last-child {
+  border-top-right-radius: 8px;
+}
+
+tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
 }
 
 th {
   background-color: #f5f5f5;
-  font-weight: 600;
-  color: #333;
-}
-
-tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-tr:hover {
-  background-color: #f0f7ff;
+  font-weight: bold;
 }
 
 .example-cell {
@@ -415,78 +507,16 @@ tr:hover {
 }
 
 @media (max-width: 768px) {
-  .words-table {
-    font-size: 0.9rem;
+  .action-section {
+    flex-direction: column;
   }
 
-  th,
-  td {
-    padding: 0.6rem 0.8rem;
+  .action-btn {
+    width: 100%;
   }
 
-  .example-cell {
-    max-width: 150px;
-  }
-}
-
-/* 添加单词组选择样式 */
-.word-groups-section {
-  width: 100%;
-  /* margin-bottom: 2rem; */
-}
-
-.word-groups {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.word-group-card {
-  background-color: #f8f9fa;
-  border: 2px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 1rem;
-  min-width: 150px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.word-group-card:hover {
-  background-color: #f0f7ff;
-  border-color: #d0e3ff;
-}
-
-.word-group-card.selected {
-  background-color: #e8f0fe;
-  border-color: #1a73e8;
-}
-
-.word-group-date {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.word-group-count {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.selection-info {
-  text-align: center;
-  margin-top: 1rem;
-  padding: 0.5rem;
-  background-color: #f0f7ff;
-  border-radius: 4px;
-  color: #1a73e8;
-}
-
-@media (max-width: 768px) {
-  .word-group-card {
-    min-width: 120px;
+  .word-groups {
+    justify-content: center;
   }
 }
 </style>

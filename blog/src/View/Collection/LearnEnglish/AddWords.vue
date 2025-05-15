@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEnglishWordsStore } from '../../../stores/englishWords';
-import axios from 'axios';
 
 const router = useRouter();
 const englishWordsStore = useEnglishWordsStore();
@@ -48,22 +47,14 @@ const saveWords = async () => {
   try {
     isSubmitting.value = true;
     
-    // 调用后端 API 保存单词
-    const response = await axios.post('http://localhost:8080/word/addWord', validPairs);
+    // 使用store的方法添加单词
+    const success = await englishWordsStore.addWords(validPairs);
     
-    if (response.data && response.data.code === 200) {
-      // 如果后端返回了最新的单词列表，更新 store
-      if (response.data.data) {
-        englishWordsStore.wordsList.value = response.data.data;
-      } else {
-        // 否则手动添加新单词到 store
-        englishWordsStore.addWords(validPairs);
-      }
-      
+    if (success) {
       // 跳转回首页
       router.push('/learnEnglish');
     } else {
-      errorMessage.value = response.data?.message || '保存单词失败，请稍后重试';
+      errorMessage.value = '保存单词失败，请稍后重试';
     }
   } catch (error) {
     console.error('保存单词出错:', error);
