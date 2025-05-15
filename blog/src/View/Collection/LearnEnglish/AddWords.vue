@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEnglishWordsStore } from '../../../stores/englishWords';
+import { wordApi } from '../../../api/word'; // 添加API导入
 
 const router = useRouter();
 const englishWordsStore = useEnglishWordsStore();
@@ -47,10 +48,21 @@ const saveWords = async () => {
   try {
     isSubmitting.value = true;
     
-    // 使用store的方法添加单词
-    const success = await englishWordsStore.addWords(validPairs);
+    // 为每个单词对添加日期
+    const wordsWithDate = validPairs.map(pair => ({
+      ...pair,
+      date: new Date().toISOString()
+    }));
     
-    if (success) {
+    // 直接使用API添加单词
+    const response = await wordApi.addWord(wordsWithDate);
+    
+    if (response && response.code === 200 && response.data) {
+      // 直接使用API返回的完整单词列表更新store
+      englishWordsStore.$patch((state) => {
+        state.wordsList = response.data;
+      });
+      
       // 跳转回首页
       router.push('/learnEnglish');
     } else {

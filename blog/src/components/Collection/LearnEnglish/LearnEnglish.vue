@@ -1,14 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useEnglishWordsStore } from '../../../stores/englishWords';
-
-// 初始化单词 store
-const englishWordsStore = useEnglishWordsStore();
-
-onMounted(() => {
-  // 在组件挂载时加载单词数据
-  englishWordsStore.initWords();
-});
 </script>
 
 <template>

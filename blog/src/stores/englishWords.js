@@ -10,7 +10,9 @@ export const useEnglishWordsStore = defineStore('englishWords', {
     wordsCount: (state) => state.wordsList.length,
     hasWords: (state) => state.wordsList.length > 0,
 
-    getWordsByDate: (state) => {
+    // 修改为返回函数的getter，这样可以通过()调用
+    wordsByDate: (state) => {
+      // 直接返回分组结果，不需要调用
       const grouped = {};
 
       state.wordsList.forEach(word => {

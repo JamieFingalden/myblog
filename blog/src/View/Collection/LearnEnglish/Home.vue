@@ -9,7 +9,7 @@ const englishWordsStore = useEnglishWordsStore();
 const wordCount = computed(() => englishWordsStore.wordsCount);
 const hasWords = computed(() => englishWordsStore.hasWords);
 const wordsList = computed(() => englishWordsStore.wordsList);
-const wordsByDate = computed(() => englishWordsStore.getWordsByDate());
+const wordsByDate = computed(() => englishWordsStore.wordsByDate);
 // 按日期从新到旧排序的单词组
 const sortedWordsByDate = computed(() => {
   const dates = Object.keys(wordsByDate.value).sort((a, b) => new Date(b) - new Date(a));
@@ -69,15 +69,6 @@ const fetchWordsList = async () => {
 
   try {
     const response = await wordApi.getAllWord();
-    console.log('获取单词列表响应:', response);
-
-    // 检查响应格式并打印更详细的日志
-    if (response) {
-      console.log('响应状态:', response.status);
-      console.log('响应数据类型:', typeof response.data);
-      console.log('响应数据:', JSON.stringify(response.data).substring(0, 200) + '...');
-    }
-
     // 更健壮的数据处理
     if (response && response.data) {
       let wordsData;
