@@ -12,19 +12,22 @@ CREATE TABLE if not exists Posts
     published_at DATETIME
 );
 
-CREATE TABLE if not exists word_bank
+CREATE TABLE IF NOT EXISTS word_bank
 (
-    english VARCHAR(100) PRIMARY KEY,
+    user_id INT          NOT NULL,
+    english VARCHAR(100) NOT NULL,
     chinese VARCHAR(200) NOT NULL,
     example TEXT,
-    date DATE NOT NULL DEFAULT (CURRENT_DATE)
+    date    DATE         NOT NULL DEFAULT (CURRENT_DATE),
+    PRIMARY KEY (user_id, english)
 );
 
-CREATE TABLE IF NOT EXISTS user(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
+CREATE TABLE IF NOT EXISTS user
+(
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    username   VARCHAR(100) NOT NULL,
+    password   VARCHAR(100) NOT NULL,
+    email      VARCHAR(100),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )
 

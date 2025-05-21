@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class WordBank {
+    private Long id;
     /**
      * 
      */

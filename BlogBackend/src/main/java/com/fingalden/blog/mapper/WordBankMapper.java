@@ -20,11 +20,11 @@ public interface WordBankMapper {
 
     int insertSelective(WordBank record);
 
-    int insertWords(List<WordBank> words);
+    int insertWords(Long userId, List<WordBank> words);
 
     WordBank selectByPrimaryKey(Long id);
 
-    List<WordBank> selectAllWorks();
+    List<WordBank> selectAllWorks(Long userId);
 
     int updateByPrimaryKeySelective(WordBank record);
 

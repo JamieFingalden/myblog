@@ -21,6 +21,7 @@ public class JWTUtil {
 
     public String createToken(Long userId) {
         return Jwts.builder()
+                .claim("userId", userId)
                 .setSubject(userId.toString())
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration*1000*60*60*24))
                 .signWith(SignatureAlgorithm.HS512, tokenSignKey)

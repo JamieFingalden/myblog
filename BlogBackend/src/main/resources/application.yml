@@ -2,9 +2,9 @@ spring:
   application:
     name: BolgBackend
   datasource:
-    url: jdbc:mysql://yunpin.cc:3306/blog?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
-    username: fgj
-    password: fgj123
+    url: jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    username: username
+    password: password
   data:
     redis:
       host: localhost
@@ -20,7 +20,7 @@ spring:
     ollama:
       base-url: http://localhost:11434
       chat:
-        model: deepseek-r1:7b
+        model: deepseek-r1:1.5b
   jackson:
     time-zone: Asia/Shanghai
 

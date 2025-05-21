@@ -25,6 +25,7 @@
         select
         <include refid="Base_Column_List" />
         from word_bank
+        where user_id = #{userId}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -53,10 +54,10 @@
     </insert>
     <insert id="insertWords">
         insert into word_bank
-        ( english,chinese,example)
+        (user_id, english, chinese, example)
         values
         <foreach collection="words" item="word" separator=",">
-            (#{word.english},#{word.chinese},#{word.example})
+            (#{userId}, #{word.english}, #{word.chinese}, #{word.example})
         </foreach>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.fingalden.blog.domain.WordBank">

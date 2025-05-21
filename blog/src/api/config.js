@@ -2,7 +2,8 @@ import axios from 'axios'
 
 // 创建axios实例
 const request = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://47.97.2.38:8080/',
+    // baseURL: 'http://localhost:8080',
     timeout: 10000
 })
 

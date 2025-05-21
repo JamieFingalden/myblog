@@ -6,10 +6,12 @@ import com.fingalden.blog.service.LoginService;
 import com.fingalden.blog.utils.JWTUtil;
 import com.fingalden.blog.utils.MD5Util;
 import com.fingalden.blog.utils.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class LoginServiceImpl implements LoginService {
     private final JWTUtil jwtUtil;
 
@@ -27,6 +29,7 @@ public class LoginServiceImpl implements LoginService {
         user.setPassword(MD5Util.encrypt(user.getPassword()));
         User user1 = userMapper.Login(user);
         if (user1 != null) {
+            log.info("用户名：{}，密码：{}", user.getUsername(), user.getPassword());
             return Result.success(jwtUtil.createToken(user1.getId()));
         }
         return Result.error("用户名或密码错误");
