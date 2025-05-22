@@ -24,6 +24,7 @@ public class JWTInterceptor implements HandlerInterceptor {
             // 设置响应的内容类型为 JSON
             response.setContentType("application/json;charset=UTF-8");
             // 将错误信息写入响应体
+            response.getWriter().write(Result.error("token is null or expired").toString());
             Result.error("token is null or expired");
             return false; // 阻止请求继续执行
         } else {

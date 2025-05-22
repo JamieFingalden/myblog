@@ -1,5 +1,6 @@
 package com.fingalden.blog.service.Impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fingalden.blog.domain.Posts;
 import com.fingalden.blog.mapper.PostsMapper;
 import com.fingalden.blog.service.PostsService;
@@ -27,7 +28,9 @@ public class PostsServiceImpl implements PostsService {
 
     @Override
     public void updatePosts(Posts posts) {
-        postsMapper.updateByPrimaryKeySelective(posts);
+//        postsMapper.updateByPrimaryKeySelective(posts);
+        QueryWrapper<Posts> wrapper = new QueryWrapper<Posts>().eq("id", posts.getId());
+        postsMapper.update(posts, wrapper);
         log.info("修改成功");
     }
 

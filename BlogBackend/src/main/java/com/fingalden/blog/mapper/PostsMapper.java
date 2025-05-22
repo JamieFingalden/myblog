@@ -1,5 +1,6 @@
 package com.fingalden.blog.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fingalden.blog.domain.Posts;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,7 +13,7 @@ import java.util.List;
 * @Entity com.fingalden.bolg.domain.Posts
 */
 @Mapper
-public interface PostsMapper {
+public interface PostsMapper extends BaseMapper<Posts> {
 
     List<Posts> selectList();
 

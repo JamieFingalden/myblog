@@ -42,9 +42,11 @@ const blogDatas = ref([]);
 const fetchBlogList = async () => {
     try {
         const response = await blogApi.getList();
-        if (response.data.code === 200) {
-            console.log('获取到的博客数据:', response.data.data); // 添加日志
-            blogDatas.value = response.data.data.map(item => ({
+        console.log('获取到的博客数据:', response.code); // 添加日志
+        
+        if (response.code === 200) {
+            console.log('获取到的博客数据:', response.data); // 添加日志
+            blogDatas.value = response.data.map(item => ({
                 title: item.title,
                 name: 'fingalden',
                 content: item.content,
@@ -82,6 +84,105 @@ const closeBlog = () => {
     showBlog.value = false
     document.body.style.overflow = 'auto'
 }
+
+// 新增博客表单相关状态
+const showBlogForm = ref(false);
+const isEditing = ref(false);
+const formBlog = ref({
+    title: '',
+    content: '',
+    excerpt: '',
+    status: '草稿'
+});
+
+// 打开新增博客表单
+const openAddBlogForm = () => {
+    isEditing.value = false;
+    formBlog.value = {
+        title: '',
+        content: '',
+        excerpt: '',
+        status: '草稿'
+    };
+    showBlogForm.value = true;
+    document.body.style.overflow = 'hidden';
+};
+
+// 打开编辑博客表单
+const openEditBlogForm = (blog) => {
+    isEditing.value = true;
+    formBlog.value = { ...blog };
+    showBlogForm.value = true;
+    document.body.style.overflow = 'hidden';
+    // 如果是从博客详情页打开编辑，则关闭详情页
+    if (showBlog.value) {
+        showBlog.value = false;
+    }
+};
+
+// 关闭博客表单
+const closeBlogForm = () => {
+    showBlogForm.value = false;
+    document.body.style.overflow = 'auto';
+};
+
+// 保存博客（新增或更新）
+const saveBlog = async () => {
+    try {
+        if (!formBlog.value.title || !formBlog.value.content) {
+            alert('标题和内容不能为空');
+            return;
+        }
+
+        if (isEditing.value) {
+            // 更新博客
+            const response = await blogApi.update(formBlog.value);
+            if (response.code === 200) {
+                alert('博客更新成功');
+                fetchBlogList(); // 重新获取列表
+                closeBlogForm();
+            } else {
+                alert('博客更新失败: ' + response.msg);
+            }
+        } else {
+            // 新增博客
+            const response = await blogApi.create(formBlog.value);
+            if (response.code === 200) {
+                alert('博客创建成功');
+                fetchBlogList(); // 重新获取列表
+                closeBlogForm();
+            } else {
+                alert('博客创建失败: ' + response.msg);
+            }
+        }
+    } catch (error) {
+        console.error('保存博客失败:', error);
+        alert('操作失败，请稍后重试');
+    }
+};
+
+// 删除博客
+const deleteBlog = async (id) => {
+    if (!confirm('确定要删除这篇博客吗？此操作不可恢复。')) {
+        return;
+    }
+    
+    try {
+        const response = await blogApi.delete(id);
+        if (response.code === 200) {
+            alert('博客删除成功');
+            fetchBlogList(); // 重新获取列表
+            if (showBlog.value) {
+                closeBlog(); // 如果正在查看详情，关闭详情
+            }
+        } else {
+            alert('博客删除失败: ' + response.msg);
+        }
+    } catch (error) {
+        console.error('删除博客失败:', error);
+        alert('删除失败，请稍后重试');
+    }
+};
 
 // 季节判断函数
 const season = ref((() => {
@@ -139,13 +240,15 @@ const seasonEmojis = {
     </div>
 
     <div class="cards">
-        <!-- 添加数据长度显示 -->
-        <div v-if="blogDatas.length === 0" class="no-data">
-            暂无博客数据
+        <!-- 添加博客按钮 -->
+        <div class="add-blog-btn" :class="{'centered-btn': blogDatas.length === 0}" @click="openAddBlogForm">
+            <span>+</span>
+            <p>添加新博客</p>
         </div>
+        
         <div class="card-container" v-for="(item, index) in blogDatas" :key="item.id" :style="cardAnimationDelay(index)"
-            style="width: 350px; background-color: #ffffff;" @click="handleCardClick(item)">
-            <Cards :title="item.title" :name="item.name" :content="item.content" :img="item.img" />
+            style="width: 350px; background-color: #ffffff;">
+            <Cards :title="item.title" :name="item.name" :content="item.content" :img="item.img" @click="handleCardClick(item)" />
         </div>
     </div>
 
@@ -164,6 +267,48 @@ const seasonEmojis = {
                 <div class="blog-body">
                     {{ selectedBlog?.content }}
                 </div>
+                <!-- 添加博客操作按钮 -->
+                <div class="blog-actions">
+                    <button class="edit-btn" @click="openEditBlogForm(selectedBlog)">编辑</button>
+                    <button class="delete-btn" @click="deleteBlog(selectedBlog.id)">删除</button>
+                </div>
+            </div>
+        </div>
+    </Transition>
+    
+    <!-- 博客表单弹出层 -->
+    <Transition name="blog-transition">
+        <div v-if="showBlogForm" class="blog-overlay" @click.self="closeBlogForm">
+            <div class="blog-form">
+                <div class="blog-close" :class="season" @click="closeBlogForm">
+                    <span>×</span>
+                </div>
+                <h2>{{ isEditing ? '编辑博客' : '创建新博客' }}</h2>
+                
+                <div class="form-group">
+                    <label for="title">标题</label>
+                    <input type="text" id="title" v-model="formBlog.title" placeholder="请输入博客标题">
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">内容</label>
+                    <textarea id="content" v-model="formBlog.content" placeholder="请输入博客内容" rows="8"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="excerpt">摘要</label>
+                    <textarea id="excerpt" v-model="formBlog.excerpt" placeholder="请输入博客摘要（可选）" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">状态</label>
+                    <select id="status" v-model="formBlog.status">
+                        <option value="草稿">草稿</option>
+                        <option value="完成">完成</option>
+                    </select>
+                </div>
+                
+                <button class="save-btn" @click="saveBlog">保存</button>
             </div>
         </div>
     </Transition>
@@ -204,7 +349,7 @@ const seasonEmojis = {
 
 .photo img {
     width: 350px;
-    transition: transform 0.5s ease;
+    transform: scale(1.03) rotate(1deg);
 }
 
 .photo:hover img {
@@ -232,7 +377,7 @@ const seasonEmojis = {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transform: scale(1.1);
 }
 
 .linkBox:hover {
@@ -363,6 +508,44 @@ const seasonEmojis = {
     line-height: 1.75;
     flex: 1;
     overflow-y: auto;
+}
+
+/* 博客操作按钮 */
+.blog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.blog-actions .edit-btn, 
+.blog-actions .delete-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.blog-actions .edit-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.blog-actions .edit-btn:hover {
+    background-color: #2563eb;
+}
+
+.blog-actions .delete-btn {
+    background-color: #ef4444;
+    color: white;
+}
+
+.blog-actions .delete-btn:hover {
+    background-color: #dc2626;
 }
 
 /* 季节装饰 */
@@ -606,5 +789,137 @@ const seasonEmojis = {
 
 :deep(.p-card-subtitle) {
     color: #666 !important;
+}
+
+/* 添加博客按钮 */
+.add-blog-btn {
+    width: 350px;
+    height: 250px;
+    background-color: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 12.5px 12.5px 12.5px;
+}
+
+.add-blog-btn:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+    transform: translateY(-5px);
+}
+
+.add-blog-btn span {
+    font-size: 3rem;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.add-blog-btn p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* 移除卡片操作按钮样式 */
+
+/* 博客表单样式 */
+.blog-form {
+    background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+    width: 50%;
+    max-width: 700px;
+    height: auto;
+    max-height: 85vh;
+    padding: 2.5rem;
+    border-radius: 24px;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    overflow-y: auto;
+}
+
+.blog-form h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.save-btn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.save-btn:hover {
+    background-color: #059669;
+}
+
+/* 滚动条样式 */
+.blog-form::-webkit-scrollbar {
+    width: 5px;
+}
+
+.blog-form::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.blog-form::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.blog-form::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .blog-form {
+        width: 90%;
+        padding: 1.5rem;
+    }
 }
 </style>
