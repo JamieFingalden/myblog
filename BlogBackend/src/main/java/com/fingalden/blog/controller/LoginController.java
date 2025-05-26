@@ -2,13 +2,11 @@ package com.fingalden.blog.controller;
 
 import com.fingalden.blog.domain.User;
 import com.fingalden.blog.service.LoginService;
+import com.fingalden.blog.service.PostsService;
 import com.fingalden.blog.utils.JWTUtil;
 import com.fingalden.blog.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -24,6 +22,15 @@ public class LoginController {
 
     @Autowired
     private LoginService loginService;
+
+    @Autowired
+    private PostsService postsService;
+
+    @GetMapping("/list")
+    public Result getPostList() {
+        System.out.println("list");
+        return Result.success(postsService.getPostsList());
+    }
 
     @PostMapping("/login")
     public Result login(@RequestBody User user) {

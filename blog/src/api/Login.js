@@ -6,5 +6,9 @@ export const loginApi = {
   },
   register(data) {
     return request.post('/login/register', data)
+  },
+
+  validationToken() {
+    return request.get('/posts/validation')
   }
 }

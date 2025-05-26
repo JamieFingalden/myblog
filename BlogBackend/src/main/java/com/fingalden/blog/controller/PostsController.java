@@ -36,4 +36,9 @@ public class PostsController {
         postsService.deletePosts(id);
         return Result.success();
     }
+
+    @GetMapping("/validation")
+    public Result validationToken() {
+        return Result.success("right");
+    }
 }

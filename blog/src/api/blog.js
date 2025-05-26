@@ -4,7 +4,7 @@ import request from './config'
 export const blogApi = {
     // 获取博客列表
     getList() {
-        return request.get('/posts/list')
+        return request.get('/login/list')
     },
     // 获取博客详情
     getDetail(id) {

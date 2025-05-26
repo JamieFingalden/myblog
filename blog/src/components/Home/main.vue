@@ -11,6 +11,7 @@ import githubImg from '../../assets/link/github.png'
 import githubClick from '../../assets/link/github-click.png'
 
 import { blogApi } from '../../api/blog'
+import { loginApi } from '../../api/Login'
 
 const bilibiliPng = ref(bilibiliBlack)
 const douyinPng = ref(douyinImg)
@@ -43,7 +44,7 @@ const fetchBlogList = async () => {
     try {
         const response = await blogApi.getList();
         console.log('获取到的博客数据:', response.code); // 添加日志
-        
+
         if (response.code === 200) {
             console.log('获取到的博客数据:', response.data); // 添加日志
             blogDatas.value = response.data.map(item => ({
@@ -63,9 +64,26 @@ const fetchBlogList = async () => {
     }
 };
 
+const validationLoadToken = async () => {
+    console.log('验证Token...');
+    try {
+        const response = await loginApi.validationToken();
+        console.log('令牌验证:', response.data); // 添加日志
+        if (response.data == "right") {
+            console.log('令牌验证成功');
+        } else {
+            console.log('令牌验证失败');
+            localStorage.removeItem('Authorization');
+        }
+    } catch (error) {
+        console.error('验证Token失败:', error);
+    }
+}
+
 // 在组件挂载时获取数据
 onMounted(() => {
     fetchBlogList();
+    validationLoadToken();
 });
 
 // 博客详情状态
@@ -166,7 +184,7 @@ const deleteBlog = async (id) => {
     if (!confirm('确定要删除这篇博客吗？此操作不可恢复。')) {
         return;
     }
-    
+
     try {
         const response = await blogApi.delete(id);
         if (response.code === 200) {
@@ -241,14 +259,15 @@ const seasonEmojis = {
 
     <div class="cards">
         <!-- 添加博客按钮 -->
-        <div class="add-blog-btn" :class="{'centered-btn': blogDatas.length === 0}" @click="openAddBlogForm">
+        <div class="add-blog-btn" :class="{ 'centered-btn': blogDatas.length === 0 }" @click="openAddBlogForm">
             <span>+</span>
             <p>添加新博客</p>
         </div>
-        
+
         <div class="card-container" v-for="(item, index) in blogDatas" :key="item.id" :style="cardAnimationDelay(index)"
             style="width: 350px; background-color: #ffffff;">
-            <Cards :title="item.title" :name="item.name" :content="item.content" :img="item.img" @click="handleCardClick(item)" />
+            <Cards :title="item.title" :name="item.name" :content="item.content" :img="item.img"
+                @click="handleCardClick(item)" />
         </div>
     </div>
 
@@ -275,7 +294,7 @@ const seasonEmojis = {
             </div>
         </div>
     </Transition>
-    
+
     <!-- 博客表单弹出层 -->
     <Transition name="blog-transition">
         <div v-if="showBlogForm" class="blog-overlay" @click.self="closeBlogForm">
@@ -284,22 +303,22 @@ const seasonEmojis = {
                     <span>×</span>
                 </div>
                 <h2>{{ isEditing ? '编辑博客' : '创建新博客' }}</h2>
-                
+
                 <div class="form-group">
                     <label for="title">标题</label>
                     <input type="text" id="title" v-model="formBlog.title" placeholder="请输入博客标题">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="content">内容</label>
                     <textarea id="content" v-model="formBlog.content" placeholder="请输入博客内容" rows="8"></textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="excerpt">摘要</label>
                     <textarea id="excerpt" v-model="formBlog.excerpt" placeholder="请输入博客摘要（可选）" rows="3"></textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="status">状态</label>
                     <select id="status" v-model="formBlog.status">
@@ -307,7 +326,7 @@ const seasonEmojis = {
                         <option value="完成">完成</option>
                     </select>
                 </div>
-                
+
                 <button class="save-btn" @click="saveBlog">保存</button>
             </div>
         </div>
@@ -520,7 +539,7 @@ const seasonEmojis = {
     border-top: 1px solid #e2e8f0;
 }
 
-.blog-actions .edit-btn, 
+.blog-actions .edit-btn,
 .blog-actions .delete-btn {
     padding: 8px 16px;
     border: none;
