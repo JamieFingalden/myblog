@@ -265,7 +265,8 @@ onMounted(() => {
             @keyup.enter="submitAnswer" ref="answerInput" autocomplete="off">
         </div>
 
-        <div v-if="currentWord && currentWord.example && !showFeedback" class="example">
+        <!-- 修改例句显示逻辑：仅在第一轮（英文→中文）时显示例句 -->
+        <div v-if="currentWord && currentWord.example && !showFeedback && currentRound === 1" class="example">
           <div class="example-label">例句:</div>
           <div class="example-text">{{ currentWord.example }}</div>
         </div>
